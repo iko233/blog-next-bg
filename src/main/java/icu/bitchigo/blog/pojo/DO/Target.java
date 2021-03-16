@@ -17,4 +17,5 @@ public class Target {
     @TableId(type = IdType.AUTO)
     private Integer id;
     private String name;
+    private String color;
 }

@@ -14,6 +14,6 @@ public class HomeCard {
     private Integer id;
     private String title;
     private String content;
-    private ArrayList<String> target;
+    private ArrayList<HomeCardTarget> target;
     private String className;
 }

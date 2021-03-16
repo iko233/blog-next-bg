@@ -11,6 +11,7 @@ import icu.bitchigo.blog.pojo.DO.Posts;
 import icu.bitchigo.blog.pojo.DO.Target;
 import icu.bitchigo.blog.pojo.DO.TargetMap;
 import icu.bitchigo.blog.pojo.VO.HomeCard;
+import icu.bitchigo.blog.pojo.VO.HomeCardTarget;
 import icu.bitchigo.blog.pojo.VO.HomePostsResponse;
 import icu.bitchigo.blog.service.HomeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,22 +33,25 @@ public class HomeServiceImpl implements HomeService {
     @Override
     public HomePostsResponse getHomePosts(Integer page) {
         HomePostsResponse homePostsResponse = new HomePostsResponse();
-        Integer count = postsMapper.selectCount(null);
-        homePostsResponse.setTotal(count);
         ArrayList<HomeCard> homeCards = new ArrayList<>();
-        Page<Posts> postsPage = new Page<>(page, 8);
+        Page<Posts> postsPage = new Page<>(page, 10);
         postsMapper.selectPage(postsPage, null)
                 .getRecords()
                 .forEach(posts -> {
                     Integer classId = posts.getClassId();
                     Clazz clazz = clazzMapper.selectById(classId);
-                    ArrayList<String> targets = new ArrayList<>();
+                    ArrayList<HomeCardTarget> targets = new ArrayList<>();
                     targetMapMapper.selectList(
                             new QueryWrapper<TargetMap>()
                                     .eq("post_id", posts.getId())
                     ).forEach(targetMap -> {
                         Target target = targetMapper.selectById(targetMap.getTargetId());
-                        targets.add(target.getName());
+                        targets.add(
+                                new HomeCardTarget()
+                                    .setId(target.getId())
+                                    .setName(target.getName())
+                                    .setColor(target.getColor())
+                        );
                     });
                     homeCards.add(
                             new HomeCard()
@@ -60,6 +64,7 @@ public class HomeServiceImpl implements HomeService {
                                     .setId(posts.getId())
                     );
                 });
+        homePostsResponse.setTotal(postsPage.getTotal());
         homePostsResponse.setHomeCards(homeCards);
         return homePostsResponse;
     }
